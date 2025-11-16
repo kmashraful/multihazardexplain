@@ -570,25 +570,6 @@
                 grid.appendChild(card);
             });
         }
-
-        renderMitigationOptions();
-        // -- ADD THIS NEW CODE BELOW BEFORE </script> --
-        // Check if URL has a specific page parameter
-        window.addEventListener('load', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const directPage = urlParams.get('page');
-            
-            if (directPage === 'mitigation-only') {
-                // Hide navigation
-                document.querySelector('nav').style.display = 'none';
-
-                // Show only mitigation page
-                document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                document.getElementById('mitigation').classList.add('active');
-            }
-        });
     </script>
 </body>
 </html>
