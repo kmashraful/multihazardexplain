@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitigation Options - Hazard Management Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .mitigation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .mitigation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .mitigation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-left-width: 8px;
+        }
+
+        .mitigation-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .cost-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .effectiveness {
+            margin-top: 15px;
+        }
+
+        .effectiveness-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .effectiveness-bar {
+            width: 60%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .effectiveness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="section-title">Available Mitigation Options</h1>
+        <div class="mitigation-grid" id="mitigationGrid"></div>
+    </div>
+
+    <script>
+        const mitigationOptions = {
+            1: { name: "Vertical Evacuation Structure", cost: 80, effectiveness: { Tsunami: 70, Flood: 60, Hurricane: 50, Earthquake: 20, Fire: 10 } },
+            2: { name: "Seismic Retrofitting of Buildings", cost: 70, effectiveness: { Earthquake: 80, Tsunami: 30, Hurricane: 25, Flood: 10, Fire: 15 } },
+            3: { name: "Early Warning System", cost: 50, effectiveness: { Tsunami: 60, Hurricane: 55, Flood: 45, Earthquake: 40, Fire: 35 } },
+            4: { name: "Coastal Levee/Sea Wall", cost: 100, effectiveness: { Tsunami: 85, Flood: 75, Hurricane: 60, Earthquake: 5, Fire: 0 } },
+            5: { name: "Flood Control Channels", cost: 60, effectiveness: { Flood: 80, Hurricane: 50, Tsunami: 40, Earthquake: 0, Fire: 5 } },
+            6: { name: "Fire-Resistant Building Codes", cost: 45, effectiveness: { Fire: 75, Earthquake: 15, Hurricane: 10, Tsunami: 0, Flood: 0 } },
+            7: { name: "Community Education Program", cost: 25, effectiveness: { All: 30 } },
+            8: { name: "Emergency Shelter Network", cost: 55, effectiveness: { Hurricane: 70, Flood: 65, Fire: 60, Tsunami: 50, Earthquake: 45 } },
+            9: { name: "Firebreak Zones", cost: 35, effectiveness: { Fire: 70, Hurricane: 15, Flood: 5, Tsunami: 0, Earthquake: 0 } },
+            10: { name: "Hurricane-Resistant Standards", cost: 65, effectiveness: { Hurricane: 80, Flood: 30, Fire: 10, Earthquake: 20, Tsunami: 15 } },
+            11: { name: "Evacuation Route Markers", cost: 15, effectiveness: { Tsunami: 25, Hurricane: 25, Flood: 25, Fire: 25, Earthquake: 20 } },
+            12: { name: "Wetland Restoration", cost: 40, effectiveness: { Flood: 65, Hurricane: 55, Tsunami: 45, Fire: 10, Earthquake: 0 } },
+            13: { name: "Emergency Response Training", cost: 30, effectiveness: { All: 35 } },
+            14: { name: "Backup Power Systems", cost: 45, effectiveness: { Hurricane: 50, Earthquake: 45, Fire: 40, Flood: 35, Tsunami: 35 } },
+            15: { name: "Land Use Planning", cost: 20, effectiveness: { Flood: 50, Fire: 45, Tsunami: 40, Hurricane: 30, Earthquake: 25 } },
+            16: { name: "Tsunami Barrier Gates", cost: 90, effectiveness: { Tsunami: 90, Flood: 50, Hurricane: 35, Earthquake: 0, Fire: 0 } },
+            17: { name: "Wildfire Detection System", cost: 50, effectiveness: { Fire: 85, Hurricane: 5, Flood: 0, Tsunami: 0, Earthquake: 0 } }
+        };
+
+        function renderMitigationOptions() {
+            const grid = document.getElementById('mitigationGrid');
+            
+            Object.entries(mitigationOptions).forEach(([id, option]) => {
+                const card = document.createElement('div');
+                card.className = 'mitigation-card';
+                
+                let effectivenessHTML = '';
+                if (option.effectiveness.All) {
+                    effectivenessHTML = `
+                        <div class="effectiveness-item">
+                            <span><strong>All Hazards</strong></span>
+                            <div class="effectiveness-bar">
+                                <div class="effectiveness-fill" style="width: ${option.effectiveness.All}%"></div>
+                            </div>
+                            <span>${option.effectiveness.All}%</span>
+                        </div>
+                    `;
+                } else {
+                    effectivenessHTML = Object.entries(option.effectiveness)
+                        .map(([hazard, value]) => `
+                            <div class="effectiveness-item">
+                                <span><strong>${hazard}</strong></span>
+                                <div class="effectiveness-bar">
+                                    <div class="effectiveness-fill" style="width: ${value}%"></div>
+                                </div>
+                                <span>${value}%</span>
+                            </div>
+                        `).join('');
+                }
+                
+                card.innerHTML = `
+                    <h3>${option.name}</h3>
+                    <div class="cost-badge">Cost: $${option.cost}M</div>
+                    <div class="effectiveness">
+                        <strong>Effectiveness:</strong>
+                        ${effectivenessHTML}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        renderMitigationOptions();
+    </script>
+</body>
+</html>
